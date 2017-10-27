@@ -1,0 +1,10 @@
+/srv/www/apps/helpy/shared/log/*.log {
+  create 0644 deployer deployer
+  daily
+  missingok
+  rotate 7
+  compress
+  delaycompress
+  notifempty
+  copytruncate
+}

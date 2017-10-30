@@ -13,16 +13,24 @@ variable "AMIS" {
 }
 
 variable "PRIVATE_KEY" {
-  default = "" #aws private key name
+  default = ""
+  description = "aws private key name"
 }
 
 variable "PATH_TO_PRIVATE_KEY" {
-  default = "" #path to aws private key
+  default = ""
+  description = "Path to file containing private key"
 }
+
 variable "PATH_TO_PUBLIC_KEY" {
-  default = "" #path to aws public key
+  default = "~/.ssh/id_rsa.pub"
+  description = "Path to file containing public key"
 }
 
 variable "INSTANCE_USERNAME" {
-  default = "centos" #username for ssh
+  default = "centos"
+}
+
+variable "INSTANCE_TYPE" {
+  default = "t2.micro"
 }

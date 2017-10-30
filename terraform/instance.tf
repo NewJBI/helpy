@@ -1,9 +1,9 @@
 resource "aws_instance" "packer-helpy" {
   ami           = "${var.AMI_ID}"
-  instance_type = "t2.micro"
+  instance_type = "${var.INSTANCE_TYPE}"
 
   # security group
-  vpc_security_group_ids = ["${aws_security_group.packer-default.id}"]
+  vpc_security_group_ids = ["${aws_security_group.web-default.id}"]
 
   # public SSH key
   key_name = "${var.PRIVATE_KEY}"
@@ -29,19 +29,22 @@ resource "aws_instance" "packer-helpy" {
     destination = "/tmp/logrotate_rails",
   }
 
+  provisioner "file" {
+    source = "./scripts/init.sh"
+    destination = "/tmp/init.sh",
+  }
+
   provisioner "local-exec" {
-    command = "echo 'instance id : ${aws_instance.packer-helpy.id}\nprivate ip : ${aws_instance.packer-helpy.private_ip}\npublic ip : ${aws_instance.packer-helpy.public_ip}' > packer_helpy_info.txt"
+    command = "echo 'instance id : ${aws_instance.packer-helpy.id}\nprivate ip : ${aws_instance.packer-helpy.private_ip}\npublic ip : ${aws_instance.packer-helpy.public_ip}' > helpy-info.txt"
   }
 
   provisioner "remote-exec" {
-   inline = [
-      "sudo rm -rf /etc/nginx/conf.d/default.conf",
-      "sudo mv /tmp/nginx.conf /etc/nginx/.",
-      "sudo mv /tmp/web-server.conf /etc/nginx/conf.d/.",
-      "sudo service nginx start",
-      "sudo mv /tmp/logrotate_rails /etc/logrotate.d/rails",
-      "sudo logrotate -f /etc/logrotate.conf"
-   ]
+    inline = [
+      "sudo chmod +x /tmp/init.sh",
+      "sed -i -e 's#{ssh_public_key}#${aws_key_pair.deployer.public_key}#g' /tmp/init.sh",
+      "sudo bash /tmp/init.sh",
+      "sudo rm -rf /tmp/init.sh"
+    ]
   }
 
   tags {
